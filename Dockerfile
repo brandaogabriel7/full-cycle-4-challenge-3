@@ -1,4 +1,4 @@
-FROM node:14.8.0-alpine3.11 As development
+FROM node:12.18.3-alpine3.9 As development
 
 WORKDIR /usr/src/app
 
@@ -6,12 +6,13 @@ COPY package*.json ./
 
 RUN npm set strict-ssl false
 RUN npm install --only-development
+RUN NODE_TLS_REJECT_UNAUTHORIZED=0 npm install --save sqlite3
 
 COPY . .
 
 RUN npm run build
 
-FROM node:14.8.0-alpine3.11 As production
+FROM node:12.18.3-alpine3.9 As production
 
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
@@ -22,6 +23,7 @@ COPY package*.json ./
 
 RUN npm set strict-ssl false
 RUN npm install --only=production
+RUN NODE_TLS_REJECT_UNAUTHORIZED=0 npm install --save sqlite3
 
 COPY . .
 
