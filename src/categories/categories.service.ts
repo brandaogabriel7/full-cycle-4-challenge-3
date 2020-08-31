@@ -1,9 +1,19 @@
-import { Injectable } from "@nestjs/common";
-import { Category } from "./dto/category.interface";
+import { Injectable, Inject } from '@nestjs/common';
+import { Category } from './dto/category.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class CategoriesService {
-    getAllCategories(): Category[] {
-        return [{ name: 'This endpoint returns all categories'}];
-    }
+  constructor(
+    @InjectRepository(Category) private categoryRepository: Repository<Category>
+  ) {}
+
+  async findAll(): Promise<Category[]> {
+    return await this.categoryRepository.find();
+  }
+
+  async create(category: Category) {
+    return await this.categoryRepository.save(category);
+  }
 }
