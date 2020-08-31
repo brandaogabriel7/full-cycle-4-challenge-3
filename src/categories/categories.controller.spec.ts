@@ -1,24 +1,40 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { CategoriesController } from './categories.controller';
 import { CategoriesService } from './categories.service';
+import { Category } from './dto/category.entity';
+import { Repository } from 'typeorm';
+import { getRepositoryToken } from '@nestjs/typeorm';
 
-describe('AppController', () => {
+describe('CatsController', () => {
   let categoriesController: CategoriesController;
+  let categoriesService: CategoriesService;
 
   beforeEach(async () => {
-    const app: TestingModule = await Test.createTestingModule({
+    const moduleRef = await Test.createTestingModule({
       controllers: [CategoriesController],
-      providers: [CategoriesService]
+      providers: [
+        CategoriesService,
+        {
+          provide: getRepositoryToken(Category),
+          useClass: Repository
+        }
+      ]
     }).compile();
 
-    categoriesController = app.get(CategoriesController);
+    categoriesService = moduleRef.get<CategoriesService>(CategoriesService);
+    categoriesController = moduleRef.get<CategoriesController>(
+      CategoriesController
+    );
   });
 
-  describe('root', () => {
-    it('should return all categories', () => {
-      expect(categoriesController.getCategories()).toBe([
-        { name: 'This endpoint return all categories' }
-      ]);
+  describe('findAll', () => {
+    it('should return an array of categories', async () => {
+      const result = [{ id: 1, name: 'test' }];
+      jest
+        .spyOn(categoriesService, 'findAll')
+        .mockImplementation(async () => result);
+
+      expect(await categoriesController.getCategories()).toBe(result);
     });
   });
 });
